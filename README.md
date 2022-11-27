@@ -1,6 +1,10 @@
 # Irony detection and polarity classification in Tripadvisor user reviews.
 
+ In this repository you will find several models for the classification of Trip Advisor reviews using  learning supervised algorithms.
+
 In this repository you will find several models for the classification of dialogue acts with and without context. The models were trained with Schema-Guided Dialogue (SGD) data sets and have given acceptable results. The hyperparameters it has are the ones that have offered the best results during the training process.
+
+The first dataset, Sarcasm V2 , was constructed from a large-scale and highly diverse dialogue corpus of online discussion forums to classify into sarcasm (S) and non-sarcasm (NS) classes, distributed into three balanced sample subsets based on generic sarcasm (Gen), rhetorical questions (RQ), and hyperbole (Hyp). 
 
 The dataset used is from the 8th Dialog System Technology Challenge 2019 (https://github.com/google-research-datasets/dstc8-schema-guided-dialogue). These were converted to a multiple csv files.
 
