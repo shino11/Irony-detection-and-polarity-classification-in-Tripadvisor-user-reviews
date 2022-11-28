@@ -21,5 +21,5 @@ Packages used (Python 3.7):
 - h5py 2.10.0
 
 ### References:
-Alam, M. H., Ryu, W.-J., & Lee, S. (2016). Joint multi-grain topic sentiment: Modeling semantic aspects for online reviews. Information Sciences, 339, 206-223.
-Oraby, S., Harrison, V., Reed, L., Hernandez, E., Riloff, E., & Walker, M. (2017). Creating and characterizing a diverse corpus of sarcasm in dialogue. arXiv preprint arXiv:1709.05404.
+- Alam, M. H., Ryu, W.-J., & Lee, S. (2016). Joint multi-grain topic sentiment: Modeling semantic aspects for online reviews. Information Sciences, 339, 206-223.
+- Oraby, S., Harrison, V., Reed, L., Hernandez, E., Riloff, E., & Walker, M. (2017). Creating and characterizing a diverse corpus of sarcasm in dialogue. arXiv preprint arXiv:1709.05404.
