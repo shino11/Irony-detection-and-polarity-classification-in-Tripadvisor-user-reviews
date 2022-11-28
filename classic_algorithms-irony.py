@@ -28,7 +28,7 @@ X = []
 Y = []
 Label_encoder = LabelEncoder()
 df = pd.read_csv('C:/Users/ShinoSan/Jupyter/sarcasm_v2(0-1).csv', encoding='ISO-8859-1', sep=',')
-df2 = pd.read_csv('C:/Users/ShinoSan/Jupyter/Tripadvisor_hotel_reviews-rating-sentiments-PossibleIrony.csv', encoding='ISO-8859-1', sep=',')
+df2 = pd.read_csv('C:/Users/ShinoSan/Jupyter/Tripadvisor_hotel_reviews_Rating_Polarity_PossibleIrony(0-1).csv', encoding='ISO-8859-1', sep=',')
 
 
 # Train models on Sarcasm dataset
