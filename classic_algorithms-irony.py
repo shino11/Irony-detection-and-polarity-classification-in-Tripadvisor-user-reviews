@@ -54,12 +54,12 @@ def read_sarcasm_dataset():
 
 # # classify tripadvisor dataset
 def read_tripadvisor_dataset():
-    cols = ['Review', 'Rating', 'Sentiment_Score', 'Sentiment', 'Possible_Irony']
+    cols = ['Review', 'Rating', 'Sentiment_Score', 'Polarity', 'Possible_Irony']
     df.columns = cols
     x2 = df2.loc[:, 'Review']
     a = df2.loc[:, 'Rating']
     b = df2.loc[:, 'Sentiment_Score']
-    c = df2.loc[:, 'Sentiment']
+    c = df2.loc[:, 'Polarity']
     d = df2.loc[:, 'Possible_Irony']
     print(df2.shape)
     word_embedding(x2)
