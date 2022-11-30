@@ -2,11 +2,11 @@ import gensim.downloader as api
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
-from sklearn.model_selection import train_test_split, StratifiedKFold
+from sklearn.model_selection import train_test_split, StratifiedKFold, validation_curve
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, \
     balanced_accuracy_score
 from sklearn.preprocessing import PolynomialFeatures, LabelEncoder
@@ -14,8 +14,6 @@ from gensim.models import KeyedVectors
 from sklearn.tree import DecisionTreeClassifier
 
 from Word2VecVectorizer import Word2VecVectorizer
-
-
 import joblib
 import matplotlib
 matplotlib.use('TkAgg')
@@ -29,8 +27,10 @@ pd.set_option('display.max_rows', None)
 X = []
 Y = []
 Label_encoder = LabelEncoder()
-df = pd.read_csv('C:/Users/ShinoSan/Jupyter/sarcasm_v2(0-1).csv', encoding='ISO-8859-1', sep=',')
-df2 = pd.read_csv('C:/Users/ShinoSan/Jupyter/Tripadvisor_hotel_reviews_Rating_Polarity_PossibleIrony(0-1).csv', encoding='ISO-8859-1', sep=',')
+# df = pd.read_csv('irony/sarcasm_v2(0-1).csv', encoding='ISO-8859-1', sep=',')
+df = pd.read_csv('Sarcasm_Corpus_Amazon_Polarity_Corpus(ironic^non-ironic).csv', encoding='ISO-8859-1', sep='|')
+# df = pd.read_csv('Sarcasm_Corpus_Amazon_Polarity_Corpus(0-1).csv', encoding='ISO-8859-1', sep=',')
+df2 = pd.read_csv('Tripadvisor_hotel_reviews-Rating-Polarity-PossibleIrony.csv', encoding='ISO-8859-1', sep=',')
 
 
 # Train models on Sarcasm dataset
@@ -52,12 +52,29 @@ def read_sarcasm_dataset():
     global Y
     Y = Label_encoder.fit_transform(label)
     print(Y.shape)
+    global param_range
+    param_range = x_featured
+
+
+def read_irony_dataset_Amazon():
+    cols = ['stars' , 'title' , 'date','author' , 'product','review' , 'irony']
+    df.columns = cols
+    # global Label
+    x1 = df.loc[:, 'review']
+    label = df.loc[:, 'irony']
+    print(df.shape)
+    word_embedding(x1)
+    # Label
+    global Y
+    Y = Label_encoder.fit_transform(label)
+    print(Y.shape)
+    global param_range
 
 
 # # classify tripadvisor dataset
 def read_tripadvisor_dataset():
     cols = ['Review', 'Rating', 'Sentiment_Score', 'Polarity', 'Possible_Irony']
-    df.columns = cols
+    df2.columns = cols
     x2 = df2.loc[:, 'Review']
     a = df2.loc[:, 'Rating']
     b = df2.loc[:, 'Sentiment_Score']
@@ -70,9 +87,9 @@ def read_tripadvisor_dataset():
 # glove with format of word2vec
 def word_embedding (x):
     global X
-    # model = KeyedVectors.load_word2vec_format('glove.word2vec', binary=False)
-    model = api.load("glove-wiki-gigaword-100")  # load pre-trained word-vectors from gensim-data   fasttext-wiki-news-subwords-300 no
-    # model = api.load("fasttext-wiki-news-subwords-300")  # load pre-trained word-vectors from gensim-data ok
+    model = KeyedVectors.load_word2vec_format('glove.word2vec', binary=False)
+    # model = api.load("glove-wiki-gigaword-100")  # load pre-trained word-vectors from gensim-data
+    # model = api.load("fasttext-wiki-news-subwords-300")  # load pre-trained word-vectors from gensim-data fasttext-wiki-news-subwords-300
     vectorizer = Word2VecVectorizer(model)
     # Get the sentence embeddings for the train dataset
     X = vectorizer.fit_transform(x)  # X_featured
@@ -87,157 +104,13 @@ def distribution(d, name, col, tag):
     dff.to_csv(name, encoding='ISO-8859-1', mode='a')
 
 
-# def getEmbedding(EMBEDDING_DIM):
-#     embeddings_index = {}
-#     count = 0
-#     words = []
-#     f = open('data/word_embeddings/glove.840B.300d.txt', encoding='utf-8', errors='ignore')
-#     # f = open('data/word_embeddings/glove.6B.100d.txt', encoding='utf-8', errors='ignore')
-#     for line in f:
-#         values = line.split()
-#         word = values[0]
-#         words.append(word)
-#         coefs = np.asarray(values[1:], dtype='float32')
-#         embeddings_index[word] = coefs
-#         count = count + 1;
-#     f.close()
-#
-#     tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
-#     tokenizer.fit_on_texts(words)
-#     word_index = tokenizer.word_index
-#
-#     print("total words embeddings is ", count, len(word_index))
-#     embedding_matrix = np.zeros((len(word_index) + 1, EMBEDDING_DIM))
-#     for word, i in word_index.items():
-#         embedding_vector = embeddings_index.get(word)
-#         if embedding_vector is not None:
-#             # words not found in embedding index will be all-zeros.
-#             embedding_matrix[i] = embedding_vector
-#
-#     # embedding_layer = Embedding(input_dim=len(word_index) + 1,
-#     #                             output_dim=EMBEDDING_DIM,
-#     #                             weights=[embedding_matrix],
-#     #                             input_length=MAX_SEQUENCE_LENGTH,
-#     #                             trainable=True)
-#     return tokenizer, embedding_matrix
-
-
-#
-# def tf_idf(train, test):
-#     # corpus = ['This is the first document.','This document is the second document.', 'And this is the third one.', 'Is this the first document?' ]
-#     tfidf_vectorizer = TfidfVectorizer()
-#     # X = tfidf_vectorizer.fit_transform(corpus)
-#     # tfidf_vectorizer.get_feature_names_out()
-#     # print(X.shape)
-#     tfidf_train_vectors = tfidf_vectorizer.fit_transform(train)
-#     tfidf_test_vectors = tfidf_vectorizer.transform(test)
-#     return tfidf_train_vectors.toarray(), tfidf_test_vectors.toarray()
-#
-#
-# # X, Y = tf_idf(X, Label)  NO
-#
-#
-# def naive_bayes():
-#     precision_list = list()
-#     recall_list = list()
-#     accuracy_list = list()
-#     f1_list = list()
-#     classifier = GaussianNB()
-#     # classifier = DecisionTreeClassifier(random_state=0)
-#     # print(Label)
-#
-#     kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
-#     for train, test in kfold.split(X, Y):
-#         # print(X[train].shape, Y[train].shape)
-#         # x_train,x_test,y_train,y_test = train_test_split(X,Label.iloc[:,1],test_size=0.8, random_state=0, stratify=Label.iloc[:,1])
-#         # print(Label[train])
-#         classifier.fit(X[train], Y[train])
-#         labels_pred = classifier.predict(X[test])
-#         # tfidfXtrain, tfidfXtest = tf_idf(X[train], X[test])
-#         # classifier.fit(tfidfXtrain, Y[train])
-#         # labels_pred = classifier.predict(tfidfXtest)
-#         # print(labels_pred)
-#         # print(Y[test])
-#         b_acc = balanced_accuracy_score(Y[test], labels_pred)
-#         f1 = f1_score(Y[test], labels_pred, average='weighted')
-#         precision = precision_score(Y[test], labels_pred, average='weighted')
-#         recall = recall_score(Y[test], labels_pred, average='weighted')
-#         # print('Test b_acc:', b_acc)
-#         # print('Test precision:', precision)
-#         # print('Test recall:', recall)
-#         # print('Test f1:', f1)
-#         accuracy_list.append(b_acc)
-#         precision_list.append(precision)
-#         recall_list.append(recall)
-#         f1_list.append(f1)
-#
-#     print('avg b_accuracy precision recall f1')
-#     # print('avg b_accuracy {0}'.format(np.average(accuracy_list)))
-#     # print('avg precision {0}'.format(np.average(precision_list)))
-#     # print('avg recall {0}'.format(np.average(recall_list)))
-#     # print('avg f1 {0}'.format(np.average(f1_list)))
-#     print(np.average(accuracy_list))
-#     print(np.average(precision_list))
-#     print(np.average(recall_list))
-#     print(np.average(f1_list))
-#     plt.figure()
-#     plt.plot(f1_list, color='darkorange', lw=2, label='F1')
-#     plt.show()
-#
-#
-# def decision_tree():
-#     precision_list = list()
-#     recall_list = list()
-#     accuracy_list = list()
-#     f1_list = list()
-#     classifier = DecisionTreeClassifier(random_state=0)
-#
-#     kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=0)
-#     for train, test in kfold.split(X, Y):
-#         # print(X[train].shape, Y[train].shape)
-#         # x_train,x_test,y_train,y_test = train_test_split(X,Label.iloc[:,1],test_size=0.8, random_state=0, stratify=Label.iloc[:,1])
-#         # print(Label[train])
-#         classifier.fit(X[train], Y[train])
-#         labels_pred = classifier.predict(X[test])
-#         # tfidfXtrain, tfidfXtest = tf_idf(X[train], X[test])
-#         # classifier.fit(tfidfXtrain, Y[train])
-#         # labels_pred = classifier.predict(tfidfXtest)
-#         # print(labels_pred)
-#         # print(Y[test])
-#         b_acc = balanced_accuracy_score(Y[test], labels_pred)
-#         f1 = f1_score(Y[test], labels_pred, average='weighted')
-#         precision = precision_score(Y[test], labels_pred, average='weighted')
-#         recall = recall_score(Y[test], labels_pred, average='weighted')
-#         # print('Test b_acc:', b_acc)
-#         # print('Test precision:', precision)
-#         # print('Test recall:', recall)
-#         # print('Test f1:', f1)
-#         accuracy_list.append(b_acc)
-#         precision_list.append(precision)
-#         recall_list.append(recall)
-#         f1_list.append(f1)
-#
-#     print('avg b_accuracy precision recall f1')
-#     # print('avg b_accuracy {0}'.format(np.average(accuracy_list)))
-#     # print('avg precision {0}'.format(np.average(precision_list)))
-#     # print('avg recall {0}'.format(np.average(recall_list)))
-#     # print('avg f1 {0}'.format(np.average(f1_list)))
-#     print(np.average(accuracy_list))
-#     print(np.average(precision_list))
-#     print(np.average(recall_list))
-#     print(np.average(f1_list))
-#     plt.figure()
-#     plt.plot(f1_list, color='darkorange', lw=2, label='F1')
-#     plt.show()
-
-
-def randon_forest_exp():
+def random_forest_exp():
     global X, Y
     precision_list = list()
     recall_list = list()
     accuracy_list = list()
     f1_list = list()
-    classifier = RandomForestClassifier(random_state=42, verbose=1, n_estimators=100, n_jobs=4)
+    classifier = RandomForestClassifier(random_state=42, n_estimators=100, n_jobs=4)
     kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
     for train, test in kfold.split(X, Y):
         # print(X[train].shape, Y[train].shape)
@@ -246,7 +119,7 @@ def randon_forest_exp():
         # print("Accuracy: {0:.2%}".format(acc))
         labels_pred = classifier.predict(X[test])
         # print(accuracy_score(Y[test], labels_pred))
-        b_acc = accuracy_score(Y[test], labels_pred)
+        b_acc = balanced_accuracy_score(Y[test], labels_pred)
         f1 = f1_score(Y[test], labels_pred, average='weighted')
         precision = precision_score(Y[test], labels_pred, average='weighted')
         recall = recall_score(Y[test], labels_pred, average='weighted')
@@ -254,12 +127,13 @@ def randon_forest_exp():
         precision_list.append(precision)
         recall_list.append(recall)
         f1_list.append(f1)
-    print('avg accuracy precision recall f1')
+    print('avg b_accuracy precision recall f1')
     print(np.average(accuracy_list))
     print(np.average(precision_list))
     print(np.average(recall_list))
     print(np.average(f1_list))
     plt.figure()
+    plt.title('random forest')
     plt.plot(f1_list, color='darkorange', lw=2, label='F1')
     plt.show()
 
@@ -274,7 +148,7 @@ def KNN_exp():
     for train, test in kfold.split(X, Y):
         classifier.fit(X[train], Y[train])
         labels_pred = classifier.predict(X[test])
-        b_acc = accuracy_score(Y[test], labels_pred)
+        b_acc = balanced_accuracy_score(Y[test], labels_pred)
         f1 = f1_score(Y[test], labels_pred, average='weighted')
         precision = precision_score(Y[test], labels_pred, average='weighted')
         recall = recall_score(Y[test], labels_pred, average='weighted')
@@ -282,12 +156,13 @@ def KNN_exp():
         precision_list.append(precision)
         recall_list.append(recall)
         f1_list.append(f1)
-    print('avg accuracy precision recall f1')
+    print('avg b_accuracy precision recall f1')
     print(np.average(accuracy_list))
     print(np.average(precision_list))
     print(np.average(recall_list))
     print(np.average(f1_list))
     plt.figure()
+    plt.title('KNN')
     plt.plot(f1_list, color='darkorange', lw=2, label='F1')
     plt.show()
 
@@ -302,7 +177,7 @@ def SVM_exp():
     for train, test in kfold.split(X, Y):
         classifier.fit(X[train], Y[train])
         labels_pred = classifier.predict(X[test])
-        b_acc = accuracy_score(Y[test], labels_pred)
+        b_acc = balanced_accuracy_score(Y[test], labels_pred)
         f1 = f1_score(Y[test], labels_pred, average='weighted')
         precision = precision_score(Y[test], labels_pred, average='weighted')
         recall = recall_score(Y[test], labels_pred, average='weighted')
@@ -310,12 +185,13 @@ def SVM_exp():
         precision_list.append(precision)
         recall_list.append(recall)
         f1_list.append(f1)
-    print('avg accuracy precision recall f1')
+    print('avg b_accuracy precision recall f1')
     print(np.average(accuracy_list))
     print(np.average(precision_list))
     print(np.average(recall_list))
     print(np.average(f1_list))
     plt.figure()
+    plt.title('SVM')
     plt.plot(f1_list, color='darkorange', lw=2, label='F1')
     plt.show()
 
@@ -330,7 +206,7 @@ def naive_bayes_exp():
     for train, test in kfold.split(X, Y):
         classifier.fit(X[train], Y[train])
         labels_pred = classifier.predict(X[test])
-        b_acc = accuracy_score(Y[test], labels_pred)
+        b_acc = balanced_accuracy_score(Y[test], labels_pred)
         f1 = f1_score(Y[test], labels_pred, average='weighted')
         precision = precision_score(Y[test], labels_pred, average='weighted')
         recall = recall_score(Y[test], labels_pred, average='weighted')
@@ -338,12 +214,13 @@ def naive_bayes_exp():
         precision_list.append(precision)
         recall_list.append(recall)
         f1_list.append(f1)
-    print('avg accuracy precision recall f1')
+    print('avg b_accuracy precision recall f1')
     print(np.average(accuracy_list))
     print(np.average(precision_list))
     print(np.average(recall_list))
     print(np.average(f1_list))
     plt.figure()
+    plt.title('naive bayes')
     plt.plot(f1_list, color='darkorange', lw=2, label='F1')
     plt.show()
 
@@ -353,12 +230,12 @@ def logistic_regression_exp():
     recall_list = list()
     accuracy_list = list()
     f1_list = list()
-    classifier = LogisticRegression(random_state=42)
+    classifier = LogisticRegression(random_state=42, max_iter=200, n_jobs=4)
     kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
     for train, test in kfold.split(X, Y):
         classifier.fit(X[train], Y[train])
         labels_pred = classifier.predict(X[test])
-        b_acc = accuracy_score(Y[test], labels_pred)
+        b_acc = balanced_accuracy_score(Y[test], labels_pred)
         f1 = f1_score(Y[test], labels_pred, average='weighted')
         precision = precision_score(Y[test], labels_pred, average='weighted')
         recall = recall_score(Y[test], labels_pred, average='weighted')
@@ -366,7 +243,36 @@ def logistic_regression_exp():
         precision_list.append(precision)
         recall_list.append(recall)
         f1_list.append(f1)
-    print('avg accuracy precision recall f1')
+    print('avg b_accuracy precision recall f1')
+    print(np.average(accuracy_list))
+    print(np.average(precision_list))
+    print(np.average(recall_list))
+    print(np.average(f1_list))
+    plt.figure()
+    plt.title('logistic regression')
+    plt.plot(f1_list, color='darkorange', lw=2, label='F1')
+    plt.show()
+
+
+def logistic_regressionSGD_exp():
+    precision_list = list()
+    recall_list = list()
+    accuracy_list = list()
+    f1_list = list()
+    classifier = SGDClassifier(loss='log', random_state=0, max_iter=200, n_jobs=4)
+    kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+    for train, test in kfold.split(X, Y):
+        classifier.fit(X[train], Y[train])
+        labels_pred = classifier.predict(X[test])
+        b_acc = balanced_accuracy_score(Y[test], labels_pred)
+        f1 = f1_score(Y[test], labels_pred, average='weighted')
+        precision = precision_score(Y[test], labels_pred, average='weighted')
+        recall = recall_score(Y[test], labels_pred, average='weighted')
+        accuracy_list.append(b_acc)
+        precision_list.append(precision)
+        recall_list.append(recall)
+        f1_list.append(f1)
+    print('avg b_accuracy precision recall f1')
     print(np.average(accuracy_list))
     print(np.average(precision_list))
     print(np.average(recall_list))
@@ -376,17 +282,17 @@ def logistic_regression_exp():
     plt.show()
 
 
-def randon_forest_model_training():
-    classifier = RandomForestClassifier(random_state=42, verbose=1, n_estimators=100, n_jobs=4)
+def random_forest_model_training():
+    classifier = RandomForestClassifier(random_state=42, n_estimators=100, n_jobs=4)
     ## Train model to save
     x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.1, random_state=42, stratify=Y)
     print(x_train.shape, y_train.shape)
     print(x_test.shape, y_test.shape)
     classifier.fit(x_train, y_train)
-    joblib.dump(classifier, "rf.pkl")  # save
-    model = joblib.load("rf.pkl")  # load
+    joblib.dump(classifier, "rf_irony.pkl")  # save
+    model = joblib.load("rf_irony.pkl")  # load
     labels_pred = model.predict(x_test)
-    b_acc = accuracy_score(y_test, labels_pred)
+    b_acc = balanced_accuracy_score(y_test, labels_pred)
     f1 = f1_score(y_test, labels_pred, average='weighted')
     precision = precision_score(y_test, labels_pred, average='weighted')
     recall = recall_score(y_test, labels_pred, average='weighted')
@@ -402,10 +308,10 @@ def KNN_model_training():
     x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.1, random_state=42, stratify=Y)
     classifier.fit(x_train, y_train)
     import joblib
-    joblib.dump(classifier, "knn.pkl")  # save
-    model = joblib.load("knn.pkl")  # load
+    joblib.dump(classifier, "knn_irony.pkl")  # save
+    model = joblib.load("knn_irony.pkl")  # load
     labels_pred = model.predict(x_test)
-    b_acc = accuracy_score(y_test, labels_pred)
+    b_acc = balanced_accuracy_score(y_test, labels_pred)
     f1 = f1_score(y_test, labels_pred, average='weighted')
     precision = precision_score(y_test, labels_pred, average='weighted')
     recall = recall_score(y_test, labels_pred, average='weighted')
@@ -421,10 +327,10 @@ def SVM_model_training():
     x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.1, random_state=42, stratify=Y)
     classifier.fit(x_train, y_train)
     import joblib
-    joblib.dump(classifier, "svm.pkl")  # save
-    model = joblib.load("svm.pkl")  # load
+    joblib.dump(classifier, "svm_irony.pkl")  # save
+    model = joblib.load("svm_irony.pkl")  # load
     labels_pred = model.predict(x_test)
-    b_acc = accuracy_score(y_test, labels_pred)
+    b_acc = balanced_accuracy_score(y_test, labels_pred)
     f1 = f1_score(y_test, labels_pred, average='weighted')
     precision = precision_score(y_test, labels_pred, average='weighted')
     recall = recall_score(y_test, labels_pred, average='weighted')
@@ -441,10 +347,10 @@ def naive_bayes_model_training():
     print(x_train.shape, y_train.shape)
     print(x_test.shape, y_test.shape)
     classifier.fit(x_train, y_train)
-    joblib.dump(classifier, "nb.pkl")  # save
-    model = joblib.load("nb.pkl")  # load
+    joblib.dump(classifier, "nb_irony.pkl")  # save
+    model = joblib.load("nb_irony.pkl")  # load
     labels_pred = model.predict(x_test)
-    b_acc = accuracy_score(y_test, labels_pred)
+    b_acc = balanced_accuracy_score(y_test, labels_pred)
     f1 = f1_score(y_test, labels_pred, average='weighted')
     precision = precision_score(y_test, labels_pred, average='weighted')
     recall = recall_score(y_test, labels_pred, average='weighted')
@@ -455,16 +361,16 @@ def naive_bayes_model_training():
 
 
 def logistic_regression_model_training():
-    classifier = LogisticRegression(random_state=42)
+    classifier = LogisticRegression(random_state=42, max_iter=200, n_jobs=4)
     ## Train model to save
     x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.1, random_state=42, stratify=Y)
     print(x_train.shape, y_train.shape)
     print(x_test.shape, y_test.shape)
     classifier.fit(x_train, y_train)
-    joblib.dump(classifier, "lr.pkl")  # save
-    model = joblib.load("lr.pkl")  # load
+    joblib.dump(classifier, "lr_irony.pkl")  # save
+    model = joblib.load("lr_irony.pkl")  # load
     labels_pred = model.predict(x_test)
-    b_acc = accuracy_score(y_test, labels_pred)
+    b_acc = balanced_accuracy_score(y_test, labels_pred)
     f1 = f1_score(y_test, labels_pred, average='weighted')
     precision = precision_score(y_test, labels_pred, average='weighted')
     recall = recall_score(y_test, labels_pred, average='weighted')
@@ -474,14 +380,15 @@ def logistic_regression_model_training():
     print(f1)
 
 
-def randon_forest_classifier():
-    model = joblib.load("rf.pkl")  # load
+def random_forest_classifier():
+    model = joblib.load("rf_irony.pkl")  # load
     labels_pred = model.predict(X) # classify new
     new_labels = Label_encoder.inverse_transform(labels_pred)
     print(df2.head(30))
     df2["Sec_Irony"] = new_labels
     print(df2.head(30))
-    df2.to_csv("Tripadvisor_hotel_reviews_Rating_Polarity_Possible-Irony_Sec-Irony(0-1).csv", index=False)   
+    df2.to_csv("Tripadvisor_hotel_reviews_Rating_Polarity_Possible-Irony_ML-Irony(0-1).csv", index=False)
+    # print(new_labels)
     # for i in range(len(labels_pred)):
     #     print(X2[i], new_labels[i])
 
@@ -494,7 +401,7 @@ def randon_forest_classifier():
 
 
 # def KNN_clasifier():
-#     model = joblib.load("knn.pkl")  # load
+#     model = joblib.load("knn_irony.pkl")  # load
 #     labels_pred = model.predict(X) # classify new
 #     new_labels = Label_encoder.inverse_transform(labels_pred)
 #     print(new_labels)
@@ -502,40 +409,25 @@ def randon_forest_classifier():
 #     # print(X[i], new_labels[i])
 #     # print(labels_pred.inverse_transform())
 
+
 def logistic_regression_classifier():
-    model = joblib.load("lr.pkl")  # load
+    model = joblib.load("lr_irony.pkl")  # load
     labels_pred = model.predict(X) # classify new
     new_labels = Label_encoder.inverse_transform(labels_pred)
-    print(new_labels)
+    print(df2.head())
+    df2["ML_Irony"] = new_labels
+    print(df2.head())
+    df2.to_csv("Tripadvisor_hotel_reviews-Rating-Polarity-PossibleIrony-MLIrony.csv", index=False)
     # for i in range(len(labels_pred)):
     #     print(X2[i], new_labels[i])
 
-def plot_validation_curve(param_range, train_scores, test_scores, title, alpha=0.1):
-    param_range = [x[1] for x in param_range]
-    sort_idx = np.argsort(param_range)
-    param_range=np.array(param_range)[sort_idx]
-    train_mean = np.mean(train_scores, axis=1)[sort_idx]
-    train_std = np.std(train_scores, axis=1)[sort_idx]
-    test_mean = np.mean(test_scores, axis=1)[sort_idx]
-    test_std = np.std(test_scores, axis=1)[sort_idx]
-    plt.plot(param_range, train_mean, label='train score', color='blue', marker='o')
-    plt.fill_between(param_range, train_mean + train_std,
-                     train_mean - train_std, color='blue', alpha=alpha)
-    plt.plot(param_range, test_mean, label='test score', color='red', marker='o')
-    plt.fill_between(param_range, test_mean + test_std, test_mean - test_std, color='red', alpha=alpha)
-    plt.title(title)
-    plt.grid(ls='--')
-    plt.xlabel('Weight of class 2')
-    plt.ylabel('Average values and standard deviation for F1-Score')
-    plt.legend(loc='best')
-    plt.show()
 
-
-read_sarcasm_dataset()
+# read_sarcasm_dataset()
+# read_irony_dataset_Amazon()
 # # irony experiment
 # print("EXPERIMENTS CROSS-VALIDATION FOLD=10---------------------------------")
 # print("RF---------------------------------")
-# randon_forest_exp()
+# random_forest_exp()
 # print("KNN---------------------------------")
 # KNN_exp()
 # print("SVM---------------------------------")
@@ -544,35 +436,44 @@ read_sarcasm_dataset()
 # naive_bayes_exp()
 # print("LR---------------------------------")
 # logistic_regression_exp()
-
+# # logistic_regressionSGD_exp()
+#
 # # training and saving models
 # print("TRAINING 90-10---------------------------------")
-# print("RF---------------------------------")
-# randon_forest_model_training()
-# print("KNN---------------------------------")
-# KNN_model_training()
-# print("SVM---------------------------------")
-# SVM_model_training()
-# print("NB---------------------------------")
-# naive_bayes_model_training()
+# # print("RF---------------------------------")
+# # random_forest_model_training()
+# # print("KNN---------------------------------")
+# # KNN_model_training()
+# # print("SVM---------------------------------")
+# # SVM_model_training()
+# # print("NB---------------------------------")
+# # naive_bayes_model_training()
 # print("LR---------------------------------")
 # logistic_regression_model_training()
-
-# classifying
-# read_tripadvisor_dataset()
-
-# print("RF---------------------------------")
-# randon_forest_classifier()
-
-df3 = pd.read_csv('Tripadvisor_hotel_reviews_Rating_Polarity_Possible-Irony_Sec-Irony_Final-Irony(sarc-notsarc).csv', encoding='ISO-8859-1', sep=',')
-
-# df3["Final_Irony"] = np.where(((df3['Possible_Irony']==1) & (df3['Sec_Irony']==1)), 'sarc', 'notsarc')
-# print(df3.head(30))
-
-df3["Final_Polarity"] = np.where(((df3['Final_Irony']=='sarc') & (df3['Polarity']=='Positive')), 'Negative', df3["Polarity"])
-df3["Final_Polarity"] = np.where(((df3['Final_Irony']=='sarc') & (df3['Polarity']=='Negative')), 'Positivo', df3["Final_Polarity"])
-print(df3.head(50))
-
-df3.to_csv("Tripadvisor_hotel_reviews_Rating_Polarity_Possible-Irony_Sec-Irony_Final-Irony_Final-Polarity.csv", index=False) 
-    
+#
+#
+# # classifying
+read_tripadvisor_dataset()
+# # print("RF---------------------------------")
+# # randon_forest_classifier()
+# print("LR---------------------------------")
+# logistic_regression_classifier()
+#
 # distribution(df2, 'distrib_tripadvisor_irony.csv', 'Review', '')
+
+# # Tag Final Irony and Final Polarity
+df3 = pd.read_csv('Tripadvisor_hotel_reviews-Rating-Polarity-PossibleIrony-MLIrony.csv', encoding='ISO-8859-1', sep=',')
+#
+# df3["Final_Irony"] = np.where(((df3['Possible_Irony']==1) & (df3['ML_Irony']==1)), 'ironic', 'notironic')
+# print(df3.head())
+#
+# df3["Final_Polarity"] = np.where(((df3['Final_Irony']=='ironic') & (df3['Polarity']=='Positive')), 'Negative', df3["Polarity"])
+# df3["Final_Polarity"] = np.where(((df3['Final_Irony']=='ironic') & (df3['Polarity']=='Negative')), 'Positive', df3["Polarity"])
+# print(df3.head())
+#
+# df3.to_csv("Tripadvisor_hotel_reviews-Rating-Polarity-PossibleIrony-MLIrony-FinalIrony-FinalPolarity.csv", index=False)
+
+distribution(df3, 'distrib_tripadvisor_irony.csv', 'Review', 'ML_Irony')
+
+df4 = pd.read_csv('Tripadvisor_hotel_reviews-Rating-Polarity-PossibleIrony-MLIrony-FinalIrony-FinalPolarity.csv', encoding='ISO-8859-1', sep=',')
+distribution(df4, 'distrib_tripadvisor_polarity.csv', 'Review', 'Final_Polarity')
