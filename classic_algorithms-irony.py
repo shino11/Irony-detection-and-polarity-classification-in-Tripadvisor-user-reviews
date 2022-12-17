@@ -468,7 +468,7 @@ df3 = pd.read_csv('Tripadvisor_hotel_reviews-Rating-Polarity-PossibleIrony-MLIro
 # print(df3.head())
 #
 # df3["Final_Polarity"] = np.where(((df3['Final_Irony']=='ironic') & (df3['Polarity']=='Positive')), 'Negative', df3["Polarity"])
-# df3["Final_Polarity"] = np.where(((df3['Final_Irony']=='ironic') & (df3['Polarity']=='Negative')), 'Positive', df3["Polarity"])
+# df3["Final_Polarity"] = np.where(((df3['Final_Irony']=='ironic') & (df3['Polarity']=='Negative')), 'Positive', df3["Final_Polarity"])
 # print(df3.head())
 #
 # df3.to_csv("Tripadvisor_hotel_reviews-Rating-Polarity-PossibleIrony-MLIrony-FinalIrony-FinalPolarity.csv", index=False)
