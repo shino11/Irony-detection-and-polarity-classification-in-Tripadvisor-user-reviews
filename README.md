@@ -8,7 +8,7 @@ The second dataset are 1254 reviews about Amazon productos [https://storm.cis.fo
 
 The third dataset consists of 20,490 hotel reviews extracted from TripAdvisor [https://www.kaggle.com/datasets/andrewmvd/trip-advisor-hotel-reviews/download?datasetVersionNumber=2], which contain the star rating (up to 5) given by the user (Alam et al., 2016).
 
-For word representation, Is used three GloVe word embedding models, 
+For word representation, three GloVe word embedding models are used, 
 1. with 6 billion words and 100 dimensions words: https://nlp.stanford.edu/data/glove.6B.zip
 2. with 6 billion words and 300 dimensions words: https://nlp.stanford.edu/data/glove.6B.zip
 3. with 840 billion words and 300 dimensions words: https://nlp.stanford.edu/data/glove.840B.300d.zip
