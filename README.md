@@ -1,4 +1,9 @@
-## Thesis: Irony detection and polarity classification in Tripadvisor user reviews
+## Irony detection and polarity classification in Tripadvisor user reviews
+
+This work was presented in the 10th World Conference on Information Communications Systems, Software, Security and Sustainability (Worlds4 2026), London, July 2026
+https://10thworlds4.sched.com/directory/artists/2?iframe=no
+
+The report will be published in this link: https://link.springer.com/series/15179
 
 In this repository you will find several models for the classification of Trip Advisor reviews by irony and polarity, using supervised learning algorithms.
 
