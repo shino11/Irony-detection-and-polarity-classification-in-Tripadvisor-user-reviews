@@ -37,4 +37,5 @@ Packages used (Python 3.7):
 ### Contact
 
 MSc. Yisel Clavel Quintero 
-yiselclavel@gmail.com 
+yiselclavel@gmail.com
+@yiselclavel
