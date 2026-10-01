@@ -1,9 +1,9 @@
-8## Irony detection and polarity classification in Tripadvisor user reviews
+## Irony detection and polarity classification in Tripadvisor user reviews
 
 This work was presented in the 10th World Conference on Information Communications Systems, Software, Security and Sustainability (Worlds4 2026), London, July 2026
 https://10thworlds4.sched.com/directory/artists/2?iframe=no
 
-The report will be published in this link: https://link.springer.com/series/15179. Please, cite this paper if you use this repository. Thanks! 
+The report will be published in this link as "Building a TripAdvisor dataset for irony-aware sentiment analysis": https://link.springer.com/series/15179. Please, cite this paper if you use this repository. Thanks! 
 
 ### Description 
 
