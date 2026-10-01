@@ -5,6 +5,8 @@ https://10thworlds4.sched.com/directory/artists/2?iframe=no
 
 The report will be published in this link: https://link.springer.com/series/15179
 
+Please, cite this paper if you use this repository. Thanks! 
+
 ### Description 
 
 In this repository you will find several models for the classification of Trip Advisor reviews by irony and polarity, using supervised learning algorithms.
