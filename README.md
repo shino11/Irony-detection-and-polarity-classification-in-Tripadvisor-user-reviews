@@ -1,4 +1,4 @@
-## Irony detection and polarity classification in Tripadvisor user reviews
+8## Irony detection and polarity classification in Tripadvisor user reviews
 
 This work was presented in the 10th World Conference on Information Communications Systems, Software, Security and Sustainability (Worlds4 2026), London, July 2026
 https://10thworlds4.sched.com/directory/artists/2?iframe=no
@@ -36,7 +36,5 @@ Packages used (Python 3.7):
 
 ### Contact
 
-MSc. Yisel Clavel Quintero 
+Yisel Clavel Quintero 
 yiselclavel@gmail.com
-
-@yiselclavel
