@@ -29,7 +29,12 @@ Packages used (Python 3.7):
 - Numpy 1.21.5
 - h5py 2.10.0
 
-### References:
+### References
 - Alam, M. H., Ryu, W.-J., & Lee, S. (2016). Joint multi-grain topic sentiment: Modeling semantic aspects for online reviews. Information Sciences, 339, 206-223.
 - Filatova, E. (2012). Irony and Sarcasm: Corpus Generation and Analysis Using Crowdsourcing. Lrec, 392-398.
 - Oraby, S., Harrison, V., Reed, L., Hernandez, E., Riloff, E., & Walker, M. (2017). Creating and characterizing a diverse corpus of sarcasm in dialogue. arXiv preprint arXiv:1709.05404.
+
+### Contact
+
+MSc. Yisel Clavel Quintero 
+yiselclavel@gmail.com 
