@@ -5,6 +5,8 @@ https://10thworlds4.sched.com/directory/artists/2?iframe=no
 
 The report will be published in this link: https://link.springer.com/series/15179
 
+### Description 
+
 In this repository you will find several models for the classification of Trip Advisor reviews by irony and polarity, using supervised learning algorithms.
 
 The first dataset, Sarcasm V2 [https://nlds.soe.ucsc.edu/sarcasm2], was constructed from a large-scale and highly diverse dialogue corpus of online discussion forums to classify into sarcasm (S) and non-sarcasm (NS) classes, distributed into three balanced sample subsets based on generic sarcasm (Gen), rhetorical questions (RQ), and hyperbole (Hyp)(Oraby et al., 2017). 
